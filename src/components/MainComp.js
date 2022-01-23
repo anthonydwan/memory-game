@@ -4,20 +4,21 @@ import uniqid from "uniqid";
 function MainComp() {
   const [currCards, setCurrCards] = useState({});
   const [deckID, setDeckID] = useState(0);
-  const [pileCreated, setPileCreated] = useState(false);
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
+  const [pileList, setPileList] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   const checkInPile = async (card) => {
-    if (!pileCreated) {
+    if (pileList.length === 0) {
       setScore((prevScore) => prevScore + 1);
-      setBestScore((prevBestScore) => Math.max(prevBestScore, score+1));
+      setBestScore((prevBestScore) => Math.max(prevBestScore, score + 1));
       console.log("CREATING PILE");
       await addToPile(card);
-      setPileCreated(true);
+      const cardArr = await listPile();
+      setPileList(cardArr);
     } else {
       const cardArr = await listPile();
       if (cardArr.map((element) => element.code).includes(card)) {
@@ -25,7 +26,7 @@ function MainComp() {
         setScore(0);
       } else {
         setScore((prevScore) => prevScore + 1);
-        setBestScore((prevBestScore) => Math.max(prevBestScore, score+1));
+        setBestScore((prevBestScore) => Math.max(prevBestScore, score + 1));
         console.log("NOT REPEAT!");
         await addToPile(card);
         //
@@ -33,7 +34,15 @@ function MainComp() {
     }
   };
 
-  
+  useEffect(() => {
+    
+  })
+
+  // const drawCardFromPile = async () => {
+  //   const pileSize = await fetch()
+  //   const redrawFromPile = min(11, )
+
+  // }
 
   const getDeckIDFromAPI = async () => {
     try {
