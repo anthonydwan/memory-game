@@ -69,7 +69,7 @@ function MainComp() {
   const getDeckIDFromAPI = async () => {
     try {
       const response = await fetch(
-        "http://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1",
+        "https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1",
         {
           mode: "cors",
         }
