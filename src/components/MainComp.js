@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import uniqid from "uniqid";
+import spade from "../Spades.svg";
+import github from "../github.png";
 
 function MainComp() {
   const [currCards, setCurrCards] = useState({});
@@ -16,14 +18,10 @@ function MainComp() {
 
   const checkInPile = async (card) => {
     if (memory.map((c) => c.code).includes(card)) {
-      console.log(card);
-      console.log("REPEAT!");
       setLostGame(true);
     } else {
-      console.log(card);
       setScore((prevScore) => prevScore + 1);
       setBestScore((prevBestScore) => Math.max(prevBestScore, score + 1));
-      console.log("NOT REPEAT!");
       setMemory([...memory, currCards.find((c) => c.code === card)]);
       setDrawn([...drawn, ...currCards.filter((c) => !drawn.includes(c))]);
       const newCards = await redraw();
@@ -103,7 +101,6 @@ function MainComp() {
 
   const reset = async () => {
     const deckID = await getDeckIDFromAPI();
-    console.log(deckID);
     await setDeckID(deckID);
     await initDraw(deckID, 10).then((obj) => setCurrCards(obj.cards));
     setDrawn([]);
@@ -126,26 +123,41 @@ function MainComp() {
   };
 
   return (
-    <div>
-      <div>
-        Current Score {score} Best Score {bestScore}
-      </div>
+    <React.Fragment>
+      <a href="https://github.com/anthonydwan/memory-game">
+        <img className="github" src={github} alt="github" />
+      </a>
+      <header>
+        <h1>
+          <img alt="spade" src={spade} width="45" /> Memory Game{" "}
+          <img alt="spade" src={spade} width="45" />
+        </h1>
 
-      <h1>{deckID}</h1>
-      {Object.keys(currCards).map((key) => {
-        const url = currCards[key].image;
-        return (
-          <img
-            onClick={handleClick}
-            key={uniqid()}
-            data-code={currCards[key].code}
-            src={url}
-            alt={currCards[key].code}
-          />
-        );
-      })}
-      {lostGame && <button onClick={reset}>Restart</button>}
-    </div>
+        <div className="scoreContainer">
+          <span>Current Score: {score}</span>
+          <span>Best Score: {bestScore}</span>
+        </div>
+        <h2>Do not pick the same card twice!</h2>
+      </header>
+      <main>
+        {Object.keys(currCards).map((key) => {
+          const url = currCards[key].image;
+          return (
+            <img
+              className="cards"
+              onClick={handleClick}
+              key={uniqid()}
+              data-code={currCards[key].code}
+              src={url}
+              alt={currCards[key].code}
+            />
+          );
+        })}
+      </main>
+      <footer className="buttonSection">
+        {lostGame && <button onClick={reset}>Game Over</button>}
+      </footer>
+    </React.Fragment>
   );
 }
 
