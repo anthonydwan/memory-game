@@ -11,32 +11,47 @@ function MainComp() {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
-  const addToPile = (card) => {
-    setPileList((prevPileList) => [...prevPileList, card]);
-  };
+  const drawn = []
+  const memory = []
+
+
+  // const addToPile = (card) => {
+  //   setPileList((prevPileList) => [...prevPileList, card]);
+  // };
 
   const checkInPile = async (card) => {
-    if (pileList.includes(card)) {
+    if (memory.includes(card)) {
       console.log("REPEAT!");
       setScore(0);
     } else {
       setScore((prevScore) => prevScore + 1);
       setBestScore((prevBestScore) => Math.max(prevBestScore, score + 1));
       console.log("NOT REPEAT!");
-      addToPile(card);
+      memory.push(card)
     }
-    await Promise.all([addToPileAPI(card), returnToDeck(card)])
+    await addToPileAPI(card)
+      .then(() => returnToDeck(card))
       .then(() => printPiles())
-      .then(() => redraw());
+      // .then(() => redraw())
+      .then(() => printPiles())
+      .catch(() => console.log("Failed!!"));
   };
 
   const returnToDeck = async (card) => {
+    console.log(
+      `returning ${currCards
+        .map((c) => c.code)
+        .filter((c) => c !== card && !pileList.includes(c))
+        .join(",")}`
+    );
     await fetch(
       `https://deckofcardsapi.com/api/deck/${deckID}/return/?cards=${currCards
         .map((c) => c.code)
-        .filter((c) => c !== card)
+        .filter((c) => c !== card && !pileList.includes(c))
         .join(",")}`
-    );
+    )
+      .then(() => console.log(`returned to deck`))
+      .catch(() => console.log("did not return to deck!"));
   };
 
   const printPiles = async () => {
@@ -45,7 +60,7 @@ function MainComp() {
       { mode: "cors" }
     );
     const printjson = await print.json();
-    await console.log(printjson);
+    await console.log(printjson.piles.drawn.cards);
   };
 
   const drawFromPileAPI = async (num, id = deckID, pileName = "drawn") => {
@@ -78,7 +93,7 @@ function MainComp() {
     ]);
     const newCards = [...drawnFromPile.cards, ...drawnFromDeck.cards];
     console.log(newCards);
-    // setCurrCards(newCards);
+    setCurrCards(newCards);
   };
 
   const updatePileAPI = async (card, id = deckID, pileName = "drawn") => {
@@ -87,10 +102,15 @@ function MainComp() {
   };
 
   const addToPileAPI = async (code, id = deckID, pileName = "drawn") => {
+    console.log(`adding ${code},${pileList.join(",")} to pile`);
     await fetch(
-      `https://deckofcardsapi.com/api/deck/${id}/pile/${pileName}/add/?cards=${code}`,
+      `https://deckofcardsapi.com/api/deck/${id}/pile/${pileName}/add/?cards=${code},${pileList.join(
+        ","
+      )}`,
       { mode: "cors" }
-    );
+    )
+      .then(() => console.log(`added to pile`))
+      .catch(() => console.log("did not add to pile!"));
   };
 
   const getDeckIDFromAPI = async () => {
@@ -128,9 +148,11 @@ function MainComp() {
   };
 
   useEffect(() => {
-    const deckID = getDeckIDFromAPI();
-    deckID.then((str) => setDeckID(str));
-    initDraw(deckID, 10).then((obj) => setCurrCards(obj.cards));
+    (async () => {
+      const deckID = await getDeckIDFromAPI();
+      await setDeckID(deckID);
+      await initDraw(deckID, 10).then((obj) => setCurrCards(obj.cards));
+    })();
   }, []);
 
   const handleClick = (e) => {
