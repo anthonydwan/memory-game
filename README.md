@@ -4,7 +4,7 @@ This game is part of the Odin Project Circullum. The aim is to familarise the in
 
 # Challenges
 
-- _API mastery_ - I tried to improve my skills in using API calls and async/await/promise by fully utilise the API as much as possible. While this complicates the project, my intention is to get myself more familiar with
+- _API mastery_ - I tried to improve my skills in using API calls and async/await/promise by utilise the deckofcards API.
 - _useEffect Hook_ - familiarising myself with lifecycle hooks in React in environments that involve APIs.
 - _react-testing_library_ - training myself to adopt TDD environment while using React
 
